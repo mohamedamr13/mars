@@ -1,0 +1,117 @@
+
+<h2 class="sr-only">Bar chart comparing success rates of MARS vs Planner Only across manipulation tasks</h2>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; margin: 1rem 0 0.5rem; font-size: 13px; color: var(--color-text-secondary);">
+  <span style="display: flex; align-items: center; gap: 6px;">
+    <span style="width: 12px; height: 12px; border-radius: 2px; background: #185FA5;"></span>
+    Planner Only
+  </span>
+  <span style="display: flex; align-items: center; gap: 6px;">
+    <span style="width: 12px; height: 12px; border-radius: 2px; background: #1D9E75;"></span>
+    MARS (full)
+  </span>
+</div>
+
+<div style="position: relative; width: 100%; height: 360px;">
+  <canvas id="marsChart" role="img" aria-label="Grouped bar chart comparing success rates of MARS vs Planner Only across 8 manipulation tasks. MARS consistently outperforms the baseline, achieving 77% mean success rate vs 20%.">
+    Tasks: Open Drawer (MARS 80%, Planner 0%), Close Drawer (MARS 70%, Planner 0%), Move Slider (MARS 70%, Planner 0%), Press Button (MARS 80%, Planner 0%), Pick and Place Cube (MARS 100%, Planner 100%), Pick and Place Cup in Basket (MARS 60%, Planner 0%), Pick and Place Concave Box (MARS 71%, Planner 29%), Pick and Place Cup (MARS 86%, Planner 29%).
+  </canvas>
+</div>
+
+<div style="display: flex; gap: 12px; margin-top: 1rem;">
+  <div style="flex: 1; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 0.75rem 1rem;">
+    <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0 0 4px;">Mean — Planner Only</p>
+    <p style="font-size: 22px; font-weight: 500; margin: 0; color: var(--color-text-primary);">20%</p>
+  </div>
+  <div style="flex: 1; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 0.75rem 1rem;">
+    <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0 0 4px;">Mean — MARS</p>
+    <p style="font-size: 22px; font-weight: 500; margin: 0; color: #1D9E75;">77%</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const labels = [
+  'Open Drawer',
+  'Close Drawer',
+  'Move Slider',
+  'Press Button',
+  'Pick & Place Cube',
+  'Pick & Place\nCup in Basket',
+  'Pick & Place\nConcave Box',
+  'Pick & Place Cup'
+];
+
+const plannerRaw = [0, 0, 0, 0, 100, 0, 29, 29];
+const marsData   = [80, 70, 70, 80, 100, 60, 71, 86];
+const NUDGE = 2.5;
+const plannerDisplay = plannerRaw.map(v => v === 0 ? NUDGE : v);
+
+new Chart(document.getElementById('marsChart'), {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Planner Only',
+        data: plannerDisplay,
+        backgroundColor: '#185FA5',
+        borderColor: '#185FA5',
+        borderWidth: 0,
+        borderRadius: 3,
+      },
+      {
+        label: 'MARS',
+        data: marsData,
+        backgroundColor: '#1D9E75',
+        borderColor: '#1D9E75',
+        borderWidth: 0,
+        borderRadius: 3,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => {
+            const real = ctx.datasetIndex === 0 ? plannerRaw[ctx.dataIndex] : marsData[ctx.dataIndex];
+            return ` ${ctx.dataset.label}: ${real}%`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: {
+          font: { size: 11 },
+          color: '#888780',
+          maxRotation: 30,
+          autoSkip: false
+        }
+      },
+      y: {
+        min: 0,
+        max: 100,
+        grid: { color: 'rgba(136,135,128,0.15)' },
+        ticks: {
+          stepSize: 20,
+          callback: v => v + '%',
+          font: { size: 11 },
+          color: '#888780'
+        },
+        title: {
+          display: true,
+          text: 'Success rate (%)',
+          font: { size: 12 },
+          color: '#888780'
+        }
+      }
+    }
+  }
+});
+</script>
